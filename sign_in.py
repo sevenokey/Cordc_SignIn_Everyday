@@ -6,23 +6,52 @@ import os
 from pathlib import Path
 
 def save_log(content):
-    # 确保logs目录存在
-    log_dir = Path("logs")
-    log_dir.mkdir(exist_ok=True)
-    
-    # 按月份创建日志文件
-    current_month = datetime.now().strftime("%Y-%m")
-    log_file = log_dir / f"checkin-{current_month}.md"
-    
-    # 获取今天的日期作为标题
-    today = datetime.now().strftime("%Y-%m-%d")
-    
-    # 格式化日志内容
-    log_content = f"\n## {today}\n\n```\n{content}\n```\n"
-    
-    # 追加内容到日志文件
-    with open(log_file, "a", encoding='utf-8') as f:
-        f.write(log_content)
+    try:
+        # 确保logs目录存在
+        log_dir = Path("logs")
+        log_dir.mkdir(exist_ok=True)
+        print(f"日志目录创建成功: {log_dir.absolute()}")
+        
+        # 按月份创建日志文件
+        current_month = datetime.now().strftime("%Y-%m")
+        log_file = log_dir / f"checkin-{current_month}.md"
+        print(f"准备写入日志文件: {log_file.absolute()}")
+        
+        # 获取今天的日期作为标题
+        today = datetime.now().strftime("%Y-%m-%d")
+        current_time = datetime.now().strftime("%H:%M:%S")
+        
+        # 格式化日志内容
+        log_content = f"""
+## {today} {current_time}
+
+<details>
+<summary>签到详情</summary>
+
+```
+
+{content}
+```
+
+</details>
+
+---
+"""
+        
+        # 追加内容到日志文件
+        with open(log_file, "a", encoding='utf-8') as f:
+            f.write(log_content)
+        print(f"日志写入成功")
+        
+        # 列出目录内容
+        print("当前目录内容:")
+        os.system("ls -la")
+        print("\nlogs 目录内容:")
+        os.system("ls -la logs/")
+        
+    except Exception as e:
+        print(f"保存日志时发生错误: {str(e)}")
+        raise
 
 def sign_in():
     # 创建一个列表来收集输出信息
@@ -43,6 +72,7 @@ def sign_in():
         
         if not email or not password:
             log_print("错误：未设置环境变量 CORDCLOUD_EMAIL 或 CORDCLOUD_PASSWORD")
+            save_log("\n".join(output_lines))
             return False
         
         log_print(f"使用账号 {email} 开始签到")
@@ -152,6 +182,7 @@ def sign_in():
                     log_print(f"上次签到时间: {match.group(1)}")
             except Exception as e:
                 log_print(f"获取上次签到时间失败: {str(e)}")
+            save_log("\n".join(output_lines))
             return True
             
         # 签到
@@ -166,20 +197,23 @@ def sign_in():
                 checkin_json = checkin_response.json()
                 if checkin_json.get('ret') == 1:
                     log_print(f"[{current_time}] 签到成功！")
+                    save_log("\n".join(output_lines))
                     return True
                 else:
                     log_print(f"[{current_time}] 签到失败：{checkin_json.get('msg', '未知错误')}")
+                    save_log("\n".join(output_lines))
                     return False
             except json.JSONDecodeError:
                 log_print(f"[{current_time}] 签到失败：响应格式错误")
+                save_log("\n".join(output_lines))
                 return False
         else:
             log_print(f"[{current_time}] 签到失败：HTTP状态码 {checkin_response.status_code}")
+            save_log("\n".join(output_lines))
             return False
             
     except Exception as e:
         log_print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] 发生错误：{str(e)}")
-        # 即使发生错误也保存日志
         save_log("\n".join(output_lines))
         return False
 
