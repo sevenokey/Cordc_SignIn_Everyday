@@ -1,5 +1,5 @@
 import requests
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 import json
 import re
 import os
@@ -13,13 +13,14 @@ def save_log(content):
         print(f"日志目录创建成功: {log_dir.absolute()}")
         
         # 按月份创建日志文件
-        current_month = datetime.now().strftime("%Y-%m")
+        current_month = (datetime.now().astimezone(timezone(timedelta(hours=8)))).strftime("%Y-%m")
         log_file = log_dir / f"checkin-{current_month}.md"
         print(f"准备写入日志文件: {log_file.absolute()}")
         
         # 获取今天的日期作为标题
-        today = datetime.now().strftime("%Y-%m-%d")
-        current_time = datetime.now().strftime("%H:%M:%S")
+        beijing_time = datetime.now().astimezone(timezone(timedelta(hours=8)))
+        today = beijing_time.strftime("%Y-%m-%d")
+        current_time = beijing_time.strftime("%H:%M:%S")
         
         # 格式化日志内容
         log_content = f"""
