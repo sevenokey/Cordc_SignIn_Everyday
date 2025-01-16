@@ -27,3 +27,16 @@ jobs:
         CORDCLOUD_EMAIL: ${{ secrets.CORDCLOUD_EMAIL }}
         CORDCLOUD_PASSWORD: ${{ secrets.CORDCLOUD_PASSWORD }}
       run: python sign_in.py
+    
+    - name: Commit logs
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add logs/
+        git commit -m "更新签到日志 $(date '+%Y-%m-%d')" || exit 0
+        
+    - name: Push changes
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        branch: ${{ github.ref }}
