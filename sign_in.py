@@ -196,6 +196,11 @@ def sign_in():
             try:
                 checkin_json = checkin_response.json()
                 if checkin_json.get('ret') == 1:
+                    # 提取签到获得的流量
+                    msg = checkin_json.get('msg', '')
+                    traffic_match = re.search(r'获得了\s*([\d.]+\s*[KMGT]?B)', msg)
+                    if traffic_match:
+                        log_print(f"签到获得流量: {traffic_match.group(1)}")
                     log_print(f"[{current_time}] 签到成功！")
                     save_log("\n".join(output_lines))
                     return True
