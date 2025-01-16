@@ -5,6 +5,9 @@ on:
     - cron: '0 1 * * *'  # 每天北京时间 9:00 运行（UTC+8）
   workflow_dispatch:      # 允许手动触发
 
+permissions:
+  contents: write        # 添加写入权限
+
 jobs:
   sign-in:
     runs-on: ubuntu-latest
@@ -33,3 +36,6 @@ jobs:
       with:
         commit_message: 更新签到日志
         file_pattern: 'logs/*.md'
+        commit_user_name: github-actions[bot]
+        commit_user_email: 41898282+github-actions[bot]@users.noreply.github.com
+        push_options: '--force'
