@@ -5,6 +5,8 @@ import re
 import os
 
 def sign_in():
+    print(f"开始执行签到任务: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    
     # 从环境变量获取账号密码
     email = os.environ.get('CORDCLOUD_EMAIL')
     password = os.environ.get('CORDCLOUD_PASSWORD')
@@ -12,6 +14,8 @@ def sign_in():
     if not email or not password:
         print("错误：未设置环境变量 CORDCLOUD_EMAIL 或 CORDCLOUD_PASSWORD")
         return False
+    
+    print(f"使用账号 {email} 开始签到")
     
     # 登录URL和签到URL
     base_url = "https://cordc.net"
@@ -60,10 +64,20 @@ def sign_in():
         
         # 获取用户页面，检查签到状态
         user_response = session.get(user_url, headers=headers)
+        
+        # 提取流量信息
+        traffic_match = re.search(r'剩余流量.*?>(.*?)</code>', user_response.text)
+        if traffic_match:
+            print(f"当前剩余流量: {traffic_match.group(1)}")
+            
+        # 提取账户有效期
+        expire_match = re.search(r'账户有效时间：(.*?)</div>', user_response.text)
+        if expire_match:
+            print(f"账户有效期至: {expire_match.group(1)}")
+        
         if "今日已签到" in user_response.text:
             print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] 今日已经签到过了")
             try:
-                # 修复正则表达式
                 match = re.search(r'上次签到时间：(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})', user_response.text)
                 if match:
                     print(f"上次签到时间: {match.group(1)}")
