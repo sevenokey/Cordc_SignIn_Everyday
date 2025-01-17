@@ -2,7 +2,7 @@ name: Auto Sign In
 
 on:
   schedule:
-    - cron: '*/720 * * * *'  # 每天北京时间 9:00 运行（UTC+8）
+    - cron: '0 */6 * * *'  # 每天北京时间 9:00 运行（UTC+8）
   workflow_dispatch:      # 允许手动触发
 
 permissions:
